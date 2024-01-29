@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <title>flask postgres</title>
+    </head>
+    <body>
+        <h1>headingggg</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>COURSE NAME</th>
+                    <th>FEES</th>
+                    <th>DURATION</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for raw in data %}
+
+            <tr>
+                <td>{{row[0]}}</td>
+                <td>{{row[1]}}</td>
+                <td>{{row[2]}}</td>
+                <td>{{row[3]}}</td>
+                <td>{{row[4]}}</td>
+                <td>{{row[5]}}</td>
+
+            </tr>
+            {% endfor %}
+            </tbody>
+
+    </body>
+</html>

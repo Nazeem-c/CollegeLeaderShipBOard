@@ -1,28 +1,34 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 import psycopg2
- 
+
 app = Flask(__name__)
- 
- 
- 
- 
+
+# Database connection parameters
+db_params = {
+    'database': 'LeaderShipBoard',
+    'host': 'localhost',
+    'user': 'postgres',
+    'password': 'postgres',
+    'port': '5432'
+}
+
 def db_conn():
-    conn = psycopg2.connect(database = "leadershipp",host="localhost",user="postgres",password="postgres",port="5432");
+    conn = psycopg2.connect(**db_params)
     return conn
- 
+
 conn = db_conn()
 cur = conn.cursor()
-
 
 @app.route('/studaveragescore', methods=['GET'])
 def studaveragescore():
     cur.execute('''
         SELECT s.stud_id, s.stud_name, AVG(a.score) AS average_score
         FROM student s
-        JOIN attends a ON s.stud_id = a.stud_id
+        JOIN score a ON s.stud_id = a.stud_id
         GROUP BY s.stud_id, s.stud_name
         ORDER BY average_score DESC;
     ''')
+    
     results = cur.fetchall()
 
     if results:
@@ -38,7 +44,6 @@ def studaveragescore():
         return jsonify({'students': student_list})
     else:
         return jsonify({'message': 'No data found'})
+
 if __name__ == '__main__':
     app.run(debug=True)
-    
-

@@ -1,42 +1,84 @@
-from flask import Flask,jsonify,request
+from flask import Flask, jsonify
 import psycopg2
 
 app = Flask(__name__)
 
+# Establish a database connection
 def db_conn():
-    conn = psycopg2.connect(database="leadershipp",host="localhost",user="postgres",password="postgres",port="5432")
-    return conn
-conn = db_conn()
-cur = conn.cursor()
+    return psycopg2.connect(database="LeaderShipBoard", host="localhost", user="postgres", password="postgres", port="5432")
 
-@app.route('/delete-department/<int:dep_id>',methods=['DELETE'])
-def delete_department(dep_id):
+# Generic function for deleting records from a table
+def delete_record(table_name, primary_key_names, primary_key_values):
     try:
-          # Check if the department with the given ID exists
-        cur.execute('SELECT dep_id FROM public.department WHERE dep_id = %s;', (dep_id,))
-        existing_department = cur.fetchone()
+        conn = db_conn()
+        cur = conn.cursor()
 
-        if existing_department:
-            # Delete from contains table
-            cur.execute('DELETE FROM public.contains WHERE dep_id = %s;', (dep_id,))
+        # Create a list of conditions for WHERE clause
+        conditions = [f'{name} = %s' for name in primary_key_names]
+        where_clause = ' AND '.join(conditions)
 
-            # Delete from course table (assuming c_id is a foreign key referencing contains table)
-            cur.execute('DELETE FROM public.course WHERE c_id >= 5677 AND c_id IN (SELECT c_id FROM public.contains WHERE dep_id = %s);', (dep_id,))
+        # Delete from the specified table
+        cur.execute(f'DELETE FROM public.{table_name} WHERE {where_clause};', primary_key_values)
+        conn.commit()
 
-            # Delete from department table
-            cur.execute('DELETE FROM public.department WHERE dep_id = %s;', (dep_id,))
-
-            conn.commit()
-
-            return jsonify({'message': f'Department with ID {dep_id} and associated records deleted successfully'})
-        else:
-            return jsonify({'message': 'Department not found'})
-    except Exception as e :
+        return jsonify({'message': f'Record with {primary_key_names} {primary_key_values} deleted successfully'})
+    except Exception as e:
         conn.rollback()
-        return jsonify({'error':str(e)})
-    finally :
+        return jsonify({'error': str(e)})
+    finally:
         cur.close()
         conn.close()
-if __name__== '__main__':
-    app.run(debug=True,port=5201)
-    
+
+
+# Function to delete records from college_department table by department ID
+def delete_college_department_by_department(dep_id):
+    try:
+        conn = db_conn()
+        cur = conn.cursor()
+
+        # Delete from college_department table by department ID
+        cur.execute('DELETE FROM public.college_department WHERE department_dep_id = %s;', (dep_id,))
+        conn.commit()
+
+        return jsonify({'message': f'Records in college_department referencing department {dep_id} deleted successfully'})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)})
+    finally:
+        cur.close()
+        conn.close()
+
+# Sample delete operation for the department table
+@app.route('/delete-department/<int:dep_id>', methods=['DELETE'])
+def delete_department(dep_id):
+    # Delete records from college_department first
+    delete_college_department_by_department(dep_id)
+    # Now delete the department
+    return delete_record('department', 'dep_id', dep_id)
+
+# Sample delete operation for the college_department table
+@app.route('/delete-college-department/<int:college_clg_id>/<int:department_dep_id>', methods=['DELETE'])
+def delete_college_department(college_clg_id, department_dep_id):
+    column_names = ['college_clg_id', 'department_dep_id']
+    return delete_record('college_department', column_names, (college_clg_id, department_dep_id))
+
+# Sample delete operation for the semester table
+@app.route('/delete-semester/<int:sem_id>', methods=['DELETE'])
+def delete_semester(sem_id):
+    column_names = ['sem_id']
+    return delete_record('semester', column_names, (sem_id,))
+
+# Sample delete operation for the student table
+@app.route('/delete-student/<int:stud_id>', methods=['DELETE'])
+def delete_student(stud_id):
+    column_names = ['stud_id']
+    return delete_record('student', column_names, (stud_id,))
+
+
+# ... (other routes)
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

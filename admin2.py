@@ -8,7 +8,7 @@ app = Flask(__name__)
 def db_conn():
     conn = psycopg2.connect(database="LeaderShipBoard", host="localhost", user="postgres", password="postgres", port="5432")
     return conn
-@app.route('/fetch-course-scores', methods=['GET'])
+@app.route('/courseStats', methods=['GET'])
 def fetch_course_scores():
     try:
         conn = db_conn()

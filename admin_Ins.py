@@ -11,7 +11,7 @@ conn = db_conn()
 cur = conn.cursor()
 
 # Route to add data to the department table
-@app.route('/add-department', methods=['POST'])
+@app.route('/adddepartment', methods=['POST'])
 def add_department():
     try:
         data = request.get_json()
@@ -39,7 +39,7 @@ def add_department():
 
 
 # Route to add data to the college_department table
-@app.route('/add-college-department', methods=['POST'])
+@app.route('/addcollegedepartment', methods=['POST'])
 def add_college_department():
     try:
         data = request.get_json()
@@ -60,8 +60,9 @@ def add_college_department():
         conn.rollback()
         return jsonify({'error': str(e), 'message': 'Failed to add College Department'}), 500
 
+
 # Route to add data to the semester table
-@app.route('/add-semester', methods=['POST'])
+@app.route('/addsemester', methods=['POST'])
 def add_semester():
     try:
         data = request.get_json()
@@ -85,7 +86,7 @@ def add_semester():
         return jsonify({'error': str(e), 'message': 'Failed to add semester'}), 500
 
 # Route to add data to the student table
-@app.route('/add-student', methods=['POST'])
+@app.route('/addstudent', methods=['POST'])
 def add_student():
     try:
         data = request.get_json()

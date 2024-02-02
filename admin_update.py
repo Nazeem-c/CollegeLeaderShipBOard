@@ -8,7 +8,7 @@ def db_conn():
     return conn
 
 # Update department
-@app.route('/update-department/<int:dep_id>', methods=['PUT'])
+@app.route('/updatedepartment/<int:dep_id>', methods=['PUT'])
 def update_department(dep_id):
     try:
         conn = db_conn()
@@ -37,26 +37,30 @@ def update_department(dep_id):
     finally:
         cur.close()
         conn.close()
+
 # Update college_department
 
-@app.route('/update-college-department/<int:college_clg_id>/<int:department_dep_id>', methods=['PUT'])
-def update_college_department(college_clg_id, department_dep_id):
+@app.route('/updatecollegedepartment', methods=['PUT'])
+def update_college_department():
     try:
         conn = db_conn()
         cur = conn.cursor()
 
         data = request.get_json()
 
-        # Validate if 'college_id' and 'dep_id' are provided in the JSON data
-        if 'college_id' not in data or 'dep_id' not in data:
-            return jsonify({'error': 'College id (college_id) and Department id (dep_id) are required for updating college_department data'}), 400
+        # Validate if 'college_clg_id' and 'department_dep_id' are provided in the JSON data
+        if 'college_clg_id' not in data or 'department_dep_id' not in data:
+            return jsonify({'error': 'College id (college_clg_id) and Department id (department_dep_id) are required for updating college_department data'}), 400
+
+        college_clg_id = request.args.get('college_clg_id')
+        department_dep_id = request.args.get('department_dep_id')
 
         # Update college_department table
         cur.execute('''
             UPDATE public.college_department
             SET college_clg_id = %s, department_dep_id = %s
             WHERE college_clg_id = %s AND department_dep_id = %s;
-        ''', (data['college_id'], data['dep_id'], college_clg_id, department_dep_id))
+        ''', (data['college_clg_id'], data['department_dep_id'], college_clg_id, department_dep_id))
 
         # Commit the transaction
         conn.commit()
@@ -70,18 +74,23 @@ def update_college_department(college_clg_id, department_dep_id):
         conn.close()
 
 
+
+
 # Update semester
-@app.route('/update-semester/<int:sem_id>', methods=['PUT'])
-def update_semester(sem_id):
+@app.route('/updatesemester', methods=['PUT'])
+def update_semester():
     try:
         conn = db_conn()
         cur = conn.cursor()
 
         data = request.get_json()
 
-        # Validate if 'sem_no' is provided and not empty in the JSON data
-        if 'sem_no' not in data or not data['sem_no']:
-            return jsonify({'error': 'Semester name (sem_no) is required and cannot be empty for updating semester data'}), 400
+        # Validate if 'sem_no' and 'sem_id' are provided in the JSON data
+        if 'sem_no' not in data or 'sem_id' not in data:
+            return jsonify({'error': 'Semester number (sem_no) and Semester id (sem_id) are required for updating semester data'}), 400
+
+        sem_no = request.args.get('sem_no')
+        sem_id = request.args.get('sem_id')
 
         # Update semester table
         cur.execute('''
@@ -102,24 +111,27 @@ def update_semester(sem_id):
         conn.close()
 
 # Update student
-@app.route('/update-student/<int:stud_id>', methods=['PUT'])
-def update_student(stud_id):
+@app.route('/updatestudent', methods=['PUT'])
+def update_student():
     try:
         conn = db_conn()
         cur = conn.cursor()
 
         data = request.get_json()
 
-        # Validate if 'stud_name' is provided and not empty in the JSON data
-        if 'stud_name' not in data or not data['stud_name']:
-            return jsonify({'error': 'Student name (stud_name) is required and cannot be empty for updating student data'}), 400
+        # Validate if 'stud_name' and 'stud_id' are provided in the JSON data
+        if 'stud_name' not in data or 'stud_id' not in data:
+            return jsonify({'error': 'Student name (stud_name) and Student id (stud_id) are required for updating student data'}), 400
+
+        stud_name = request.args.get('stud_name')
+        stud_id = request.args.get('stud_id')
 
         # Update student table
         cur.execute('''
             UPDATE public.student
             SET stud_name = %s
             WHERE stud_id = %s;
-        ''', (data['stud_name'], stud_id))
+        ''', (stud_name, stud_id))
 
         # Commit the transaction
         conn.commit()
@@ -133,4 +145,4 @@ def update_student(stud_id):
         conn.close()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5021)
+     app.run(debug=True, port=5021)
